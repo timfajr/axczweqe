@@ -13,37 +13,91 @@
       :projection="projection"
     />
 
-    <ol-vector-layer>
-      <ol-source-vector :url="shape" :format="geoJson"> </ol-source-vector>
-    </ol-vector-layer>
 
     <ol-tile-layer>
       <ol-source-osm />
     </ol-tile-layer>
+
+
+
     <ol-fullscreen-control />
     <ol-scaleline-control />
     <ol-rotate-control />
     <ol-zoom-control />
     <ol-zoomslider-control />
-    <ol-zoomtoextent-control
-      :extent="[
-      -5.318421740712579, 41.16082274292913, 9.73284186155716,
-      51.21957336557702,
-    ]"
-      tipLabel="Reset View"
-    />
+
+
+    <ol-webgl-points-layer :styles="webglPointsStyle">
+      <ol-source-webglpoints
+        :format="geoJson"
+        url="https://raw.githubusercontent.com/timfajr/axczweqe/main/src/assets/jabar_P.json"
+      />
+    </ol-webgl-points-layer>
+
+    <ol-vector-layer>
+      <ol-source-cluster :distance="40">
+        <ol-source-vector>
+          <ol-feature v-for="index in jsonfile.features" :key="index">
+            <ol-geom-point
+              :coordinates="[
+                index.properties.longtitude,
+                index.properties.latitude
+              ]"
+            ></ol-geom-point>
+          </ol-feature>
+        </ol-source-vector>
+      </ol-source-cluster>
+
+      <ol-style :overrideStyleFunction="overrideStyleFunction">
+        <ol-style-stroke color="red" :width="2"></ol-style-stroke>
+        <ol-style-fill color="rgba(255,255,255,0.1)"></ol-style-fill>
+
+        <ol-style-circle :radius="10">
+          <ol-style-fill color="#3399CC"></ol-style-fill>
+          <ol-style-stroke color="#fff" :width="1"></ol-style-stroke>
+        </ol-style-circle>
+        <ol-style-text>
+          <ol-style-fill color="#fff"></ol-style-fill>
+        </ol-style-text>
+      </ol-style>
+    </ol-vector-layer>
+
+    <ol-vector-layer
+      title="Jabar"
+    >
+      <ol-source-vector
+        ref="kabupaten"
+        url="https://raw.githubusercontent.com/timfajr/axczweqe/main/src/assets/jabar_shape.json"
+        :format="geoJson"
+        :projection="projection"
+      >
+      </ol-source-vector>
+
+      
+      <ol-style :overrideStyleFunction="overrideStyleFunctionShape"> 
+        <ol-style-stroke color="white" :width="1"></ol-style-stroke>
+        <ol-style-fill color="rgba(255,255,255,0.1)" ></ol-style-fill>
+        <ol-style-text font="15px sans-serif">
+          <ol-style-fill color="white" ></ol-style-fill>
+        </ol-style-text>
+      </ol-style>
+
+
+    </ol-vector-layer>
 
   </ol-map>
 </template>
 
 <script setup>
 import { ref, onMounted, inject } from 'vue';
+import jsonfile from "../assets/jabar_P.json";
 
 // Data Binding
 const mapRef = ref(null);
 const sourceRef = ref(null);
 
-const shape = ref ("http://localhost:5173/shape/jabar_s.json");
+const shape = ref ("https://raw.githubusercontent.com/timfajr/axczweqe/main/src/assets/jabar_S.json");
+const shape2 = ref("https://openlayers.org/data/vector/ecoregions.json");
 const url = ref(
   'https://openlayers.org/en/latest/examples/data/geojson/world-cities.geojson'
 );
@@ -55,22 +109,24 @@ const rotation = ref(0);
 const format = inject('ol-format');
 const geoJson = new format.GeoJSON();
 
-
 const webglPointsStyle = {
-  'circle-radius': 6,
-  'circle-fill-color': 'yellow',
-  'circle-stroke-width': 2,
-  'circle-stroke-color': 'darkblue',
-  'circle-opacity': [
-    'interpolate',
-    ['linear'],
-    ['get', 'population'],
+  "circle-radius": 6,
+  "circle-fill-color": "yellow",
+  "circle-stroke-width": 2,
+  "circle-stroke-color": "darkblue",
+  "circle-opacity": [
+    "interpolate",
+    ["linear"],
+    ["get", "population"],
     40000,
-    0.6,
+    1,
     2000000,
-    0.92,
+    1,
   ],
 };
+
+const parse_json = ref([]);
+console.log(jsonfile.features[0].properties.latitude)
 
 const selectConditions = inject("ol-selectconditions");
 const selectCondition = selectConditions.pointerMove;
@@ -91,28 +147,21 @@ const featureSelected = (event) => {
   }
 };
 
-const overrideStyleFunction = (feature, style) => {
+const overrideStyleFunctionShape = (feature, style) => {
+  const blue = "rgba(255,0,0,0.1)"
+  const red = "rgba(0,0,255,0.1)"
+  const green = "rgba(0,255,0,0.1)"
+  const shapedata = feature.get("SuaraTerba");
+  const wilayah = feature.get("WADMKK");
+  const color = shapedata == "Jokowi" ? blue : shapedata == "Prabowo" ? red : green
+  style.getFill().setColor(color);
+  style.getText().setText(shapedata + "\n" + wilayah)
+};
+
+const overrideStyleFunction = (feature, style, resolution) => {
+  console.log({ feature, style, resolution });
   const clusteredFeatures = feature.get("features");
   const size = clusteredFeatures.length;
-
-  const color = size > 20 ? "192,0,0" : size > 8 ? "255,128,0" : "0,128,0";
-  const radius = Math.max(8, Math.min(size, 20));
-  const dash = (2 * Math.PI * radius) / 6;
-  const calculatedDash = [0, dash, dash, dash, dash, dash, dash];
-
-  style.getImage().getStroke().setLineDash(dash);
-  style
-    .getImage()
-    .getStroke()
-    .setColor("rgba(" + color + ",0.5)");
-  style.getImage().getStroke().setLineDash(calculatedDash);
-  style
-    .getImage()
-    .getFill()
-    .setColor("rgba(" + color + ",1)");
-
-  style.getImage().setRadius(radius);
-
   style.getText().setText(size.toString());
 };
 
