@@ -1,7 +1,16 @@
 const state = {
-    items: [],
-    checkoutStatus: null,
-    total: 0
+    selected_feature: [],
+    selected_point : [],
+    Jokowi : 0,
+    Prabowo : 0,
+    Ragu : 0,
+    TotalSuara : 0,
+    Y_hoax : 0,
+    T_hoax : 0,
+    pro : 0,
+    t_pro : 0,
+    Radikal : 0,
+    Status: null
   }
   
   // getters

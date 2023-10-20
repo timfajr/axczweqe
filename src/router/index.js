@@ -8,6 +8,7 @@ import Home from '/src/page/home.vue'
 import Login from '/src/page/login.vue'
 import Not_found from '/src/page/notfound.vue'
 import Shape from '/src/page/shape.vue'
+import Map2 from '/src/page/map2.vue'
 
 // Admin
 
@@ -37,6 +38,16 @@ const routes = [
       path: '/home/',
       name: 'Home',
       component: async () => await Home,
+      meta: {
+        title: " GIS ",
+        icon: icon
+      },
+    },
+
+    {
+      path: '/map2/',
+      name: 'Map2',
+      component: async () => await Map2,
       meta: {
         title: " GIS ",
         icon: icon
