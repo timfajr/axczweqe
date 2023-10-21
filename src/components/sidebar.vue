@@ -51,11 +51,15 @@
         </div>
         <!-- Number Wrapper  -->
         </div>
-    
     </div>
 </div>
     <!-- Wrapper Statistik  -->
-
+    <apexchart
+      width="300"
+      type="donut"
+      :options="chartOptions"
+      :series="series"
+    ></apexchart>
     </div>
  
     <Maps class="h-screen w-screen justify-items-center " />
@@ -80,6 +84,23 @@ export default {
         Jokowi:"",
         Prabowo:"",
         Imbang:"",
+        chartOptions: {
+        labels: ['Jokowi', 'Prabowo', 'Ragu'],
+        legend: {
+          show: false
+        },
+        stroke: {
+          width: 0,
+        },
+        plotOptions: {
+          pie: {
+            startAngle: -90,
+            endAngle: 90,
+            offsetY: 10,
+          },
+        }
+        },
+        series: [44, 55, 13, 33],
       }
     },
     components : {

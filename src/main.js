@@ -5,7 +5,7 @@ import store from '/src/store/index.js'
 import router from './router/index'
 import VueCookies from "vue3-cookies";
 import { useCookies } from "vue3-cookies";
-
+import VueApexCharts from "vue3-apexcharts";
 
 // Map
 import OpenLayersMap from "vue3-openlayers";
@@ -35,7 +35,8 @@ app.component("EasyDataTable", Vue3EasyDataTable);
 app.use(VueCookies);
 app.config.devtools = false
 
-app.use(OpenLayersMap /* options */);
+app.use(OpenLayersMap /* options */)
+app.use(VueApexCharts)
 app.use(VueSplide)
 app.use(store)
 app.use(router)
