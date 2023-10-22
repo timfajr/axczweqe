@@ -81,6 +81,7 @@
   
   <script setup>
   import { ref, onMounted, inject , nextTick, computed  } from 'vue';
+  const emit = defineEmits()
   import jsonfile from "../assets/jabar_P.json";
   import jsonfileS from "../assets/jabar_S.json";
   import store from '/src/store/index.js'
@@ -116,11 +117,11 @@
 };
 
 const featureSelected = (event) => {
-  console.log(event.selected[0])
   if ( event.selected[0] && event.selected[0].values_.features[0].values_.data.name ){
   selectedpoint = {"name" : event.selected[0].values_.features[0].values_.data.name , "canvaser" : event.selected[0].values_.features[0].values_.data.canvaser, "catatan" :  event.selected[0].values_.features[0].values_.data.catatan, "memilih" : event.selected[0].values_.features[0].values_.data.memilih, "tokoh" : event.selected[0].values_.features[0].values_.data.tokoh , "mesjid": event.selected[0].values_.features[0].values_.data.mesjid};
   store.dispatch('cart/addPoint', selectedpoint )
   store.commit('cart/initialiseStore')
+  emit('onChange', 'feature')
   }
   else {
     selectedpoint = {}
@@ -171,6 +172,17 @@ onMounted(() => {
   let pro = 0
   let t_pro = 0
   let Radikal = 0
+  
+  let SRagu =  0
+  let SJokowi = 0
+  let SPrabowo = 0
+  let STotalSuara = 1
+  let SY_hoax = 0
+  let ST_hoax = 0
+  let Spro = 0
+  let St_pro = 0
+  let SRadikal = 0
+
   let status = "ready"
   let selected_city = ""
 
@@ -230,13 +242,15 @@ onMounted(() => {
 
 
 const shapeSelected = (event) => {
-  let Shapedata = { "kota" : event.selected[0].values_.WADMKK , "mayoritas" : event.selected[0].values_.Suara_Terba, "total_suara" : event.selected[0].values_.SUM_Masa , "total_suara_manual" : "0", "jokowi" : event.selected[0].values_.SUM_Jokowi , "prabowo" : event.selected[0].values_.SUM_Prabow , "hoax_y" : event.selected[0].values_.SUM_Y_Hoax , "hoax_t" : event.selected[0].values_.SUM_T_Hoax  ,  "hoax_r" : event.selected[0].values_.SUM_R_Hoax }
+  console.log(event.selected[0].values_)
+  let Shapedata = { "kota" : event.selected[0].values_.WADMKK , "mayoritas" : event.selected[0].values_.Suara_Terba, "total_suara" : event.selected[0].values_.SUM_Masa , "total_suara_manual" : "0", "jokowi" : event.selected[0].values_.SUM_Jokowi , "ragu" : event.selected[0].values_.SUM_Ragu,  "prabowo" : event.selected[0].values_.SUM_Prabow , "hoax_y" : event.selected[0].values_.SUM_Y_Hoax , "hoax_t" : event.selected[0].values_.SUM_T_Hoax  ,  "hoax_r" : event.selected[0].values_.SUM_R_Hoax }
   store.dispatch('cart/addShape', Shapedata )
   store.commit('cart/initialiseStore')
+  emit('onChange', 'region')
 };
 
 const selectInteactionFilter = (feature) => {
-  if ( feature.values_.WADMKK != undefined)
+  if ( feature.values_.WADMKK != undefined )
   {
     selected_city = feature.values_.WADMKK
     return feature.values_.WADMKK != undefined;
@@ -281,10 +295,40 @@ async function increment() {
     })
     store.commit('cart/initialiseStore')
     }
+
+    async function increment2() {
+    // Counting Total Base Data
+    jsonfileS.features.forEach( num => {
+        SRagu =  SRagu +  ( num.properties.Ragu_sum * num.properties.Kelompok_sum );
+        SJokowi = SJokowi + ( num.properties.Jokowi_sum * num.properties.Kelompok_sum ) ;
+        SPrabowo = SPrabowo + (num.properties.Prabowo_sum * num.properties.Kelompok_sum );
+        STotalSuara = STotalSuara + num.properties.Kelompok_sum;
+        SY_hoax = SY_hoax + ( num.properties.Y_Hoax_sum * num.properties.Kelompok_sum );
+        ST_hoax = ST_hoax + ( num.properties.T_Hoax_sum * num.properties.Kelompok_sum );
+        Spro = Spro + ( num.properties.Y_Pro_sum * num.properties.Kelompok_sum );
+        St_pro = St_pro + ( num.properties.T_Pro_sum * num.properties.Kelompok_sum );
+        SRadikal = SRadikal + ( num.properties.Rdata * num.properties.Kelompok_sum );
+    })
+    await nextTick()
+    // Commit Data Update
+    store.dispatch('cart/addStatistikWilayah', 
+    { "Ragu" : SRagu ,
+      "Jokowi" : SJokowi,
+      "Prabowo" : SPrabowo,
+      "TotalSuara" : STotalSuara,
+      "Y_hoax" : SY_hoax,
+      "T_hoax" : ST_hoax,
+      "pro" : Spro,
+      "t_pro" : St_pro,
+      "Radikal" : Radikal
+    })
+    store.commit('cart/initialiseStore')
+    }
   onMounted(() => {
     const map = mapRef.value ? mapRef.value.map : null;
     const source = sourceRef.value ? sourceRef.value.source : null;
     increment()
+    increment2()
     if ( map ) {
       map.on('postcompose', function (e) {
         // console.log(document.getElementsByTagName('canvas'))

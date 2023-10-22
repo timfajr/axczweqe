@@ -4,44 +4,25 @@ const state = {
     data : [],
     personal_series : [],
     statistik: {},
+    statistik_wilayah: {},
     status : "global"
   }
   // getters
   const getters = {
-      selected_Shape: (state, getters, rootState) => {
-          return state.selected_shape.map(({ kota }) => {
-            const items = rootState.products.all.find(items => items.kota === kota)
-            return {
-              kota: items.kota,
-              mayoritas : items.mayoritas,
-              total_suara : items.total_suara,
-              total_suara_manual : items.total_suara_manual,
-              jokowi : items.jokowi,
-              prabowo : items.prabowo,
-              hoax_y  : items.hoax_y,
-              hoax_t  : items.hoax_t,
-              hoax_r  : items.hoax_r
-            }
-          })
-        },
-        selected_Point: (state, getters, rootState) => {
-          return state.selected_features.map(({ name }) => {
-            const items = rootState.products.all.find(items => items.name === name)
-            return {
-              name: items.name,
-              canvaser : items.canvaser,
-              catatan : items.catatan,
-              memilih : items.memilih,
-              mesjid : items.mesjid,
-              tokoh : items.tokoh
-            }
-          })
-        },
         total_data: (state) => {
           return state.data
         },
         loadstatistik: (state) => {
           return state.statistik
+        },
+        loadstatistikwilayah: (state) => {
+          return state.statistik_wilayah
+        },
+        loadselectedfeature: (state) => {
+          return state.selected_features
+        },
+        loadselectedselected_shape: (state) => {
+          return state.selected_shape
         },
   }
   
@@ -74,11 +55,11 @@ const state = {
       if ( map ) {
       const ShapeItem = state.selected_shape.kota
       if ( !ShapeItem ) {
-        commit('pushShape', { kota : map.kota, mayoritas : map.mayoritas , total_suara : map.total_suara, total_suara_manual : map.total_suara_manual, jokowi : map.jokowi, prabowo : map.prabowo, hoax_y : map.hoax_y, hoax_t : map.hoax_t , hoax_r : map.hoax_r})
+        commit('pushShape', { kota : map.kota, mayoritas : map.mayoritas , total_suara : map.total_suara, total_suara_manual : map.total_suara_manual, ragu : map.ragu ,jokowi : map.jokowi, prabowo : map.prabowo, hoax_y : map.hoax_y, hoax_t : map.hoax_t , hoax_r : map.hoax_r})
       }
       else if ( ShapeItem ) {
         commit('ClearData', 'shape')
-        commit('pushShape', { kota : map.kota, mayoritas : map.mayoritas , total_suara : map.total_suara, total_suara_manual : map.total_suara_manual, jokowi : map.jokowi, prabowo : map.prabowo, hoax_y : map.hoax_y, hoax_t : map.hoax_t , hoax_r : map.hoax_r})
+        commit('pushShape', { ragu : map.ragu ,kota : map.kota, mayoritas : map.mayoritas , total_suara : map.total_suara, total_suara_manual : map.total_suara_manual, jokowi : map.jokowi, prabowo : map.prabowo, hoax_y : map.hoax_y, hoax_t : map.hoax_t , hoax_r : map.hoax_r})
       } 
     }
     },
@@ -92,6 +73,19 @@ const state = {
         else if ( PointItem ) {
           commit('ClearData', 'statistik')
           commit('pushStatistik', { "Ragu" : map.Ragu , "Jokowi" : map.Jokowi, "Prabowo" : map.Prabowo , "TotalSuara" : map.TotalSuara, "Y_hoax" : map.Y_hoax ,"T_hoax" : map.T_hoax , "pro" : map.pro, "t_pro" : map.t_pro , "Radikal" : map.Radikal })
+        } 
+      }
+    },
+
+    addStatistikWilayah ({ state, commit }, map) {
+      if ( map ) {
+        const PointItem = state.statistik.Ragu
+        if ( !PointItem ) {
+          commit('pushStatistikWilayah', { "Ragu" : map.Ragu , "Jokowi" : map.Jokowi, "Prabowo" : map.Prabowo , "TotalSuara" : map.TotalSuara, "Y_hoax" : map.Y_hoax ,"T_hoax" : map.T_hoax , "pro" : map.pro, "t_pro" : map.t_pro , "Radikal" : map.Radikal })
+        }
+        else if ( PointItem ) {
+          commit('ClearData', 'statistik')
+          commit('pushStatistikWilayah', { "Ragu" : map.Ragu , "Jokowi" : map.Jokowi, "Prabowo" : map.Prabowo , "TotalSuara" : map.TotalSuara, "Y_hoax" : map.Y_hoax ,"T_hoax" : map.T_hoax , "pro" : map.pro, "t_pro" : map.t_pro , "Radikal" : map.Radikal })
         } 
       }
     },
@@ -155,6 +149,11 @@ const state = {
             let statistikdata = JSON.parse(localStorage.getItem('vuex.statistik'));
             state.statistik = statistikdata
           }
+          if ( localStorage.getItem('vuex.statistik_wilayah') )
+          {
+            let statistikdatawilayah = JSON.parse(localStorage.getItem('vuex.statistik_wilayah'));
+            state.statistik_wilayah = statistikdatawilayah
+          }
       },
   
       pushPoint (state, { name , canvaser , catatan , memilih , mesjid , tokoh }) {
@@ -164,7 +163,6 @@ const state = {
 
       pushPersonal (state, data) {
         state.personal_series = [data]
-        console.log(state.personal_series)
       },
 
       pushStatistik (state, { Ragu , Jokowi, Prabowo , TotalSuara, Y_hoax , T_hoax , pro, t_pro , Radikal }) {
@@ -172,8 +170,13 @@ const state = {
         localStorage.setItem('vuex.statistik', JSON.stringify(state.statistik));
       },
 
-      pushShape (state, { kota , mayoritas , total_suara , total_suara_manual , jokowi , prabowo , hoax_y ,hoax_t , hoax_r }) {
-        state.selected_shape = { kota , mayoritas , total_suara , total_suara_manual , jokowi , prabowo , hoax_y ,hoax_t , hoax_r }
+      pushStatistikWilayah (state, { Ragu , Jokowi, Prabowo , TotalSuara, Y_hoax , T_hoax , pro, t_pro , Radikal }) {
+        state.statistik_wilayah = { Ragu , Jokowi, Prabowo , TotalSuara, Y_hoax , T_hoax , pro, t_pro , Radikal }
+        localStorage.setItem('vuex.statistik', JSON.stringify(state.statistik_wilayah));
+      },
+
+      pushShape (state, { kota , mayoritas , total_suara , total_suara_manual , ragu ,jokowi , prabowo , hoax_y ,hoax_t , hoax_r }) {
+        state.selected_shape = { kota , mayoritas , total_suara , ragu, total_suara_manual , jokowi , prabowo , hoax_y ,hoax_t , hoax_r }
         localStorage.setItem('vuex.shape', JSON.stringify(state.selected_shape));
       },
 
