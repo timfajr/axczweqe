@@ -1,10 +1,10 @@
 import { createApp } from 'vue'
 import './style.css'
 import App from './App.vue'
-import store from '/src/store/index.js'
 import router from './router/index'
 import VueCookies from "vue3-cookies";
 import { useCookies } from "vue3-cookies";
+import store from '/src/store/index.js'
 import VueApexCharts from "vue3-apexcharts";
 
 // Map
@@ -30,14 +30,13 @@ const app = createApp(App)
 
 library.add(fas, fab);
 app.component("font-awesome-icon", FontAwesomeIcon);
-
 app.component("EasyDataTable", Vue3EasyDataTable);
 app.use(VueCookies);
 app.config.devtools = false
 
 app.use(OpenLayersMap /* options */)
-app.use(VueApexCharts)
 app.use(VueSplide)
-app.use(store)
 app.use(router)
+app.use(store)
+app.use(VueApexCharts);
 app.mount('#app')

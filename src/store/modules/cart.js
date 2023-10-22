@@ -38,7 +38,10 @@ const state = {
           })
         },
         total_data: (state) => {
-          return JSON.stringify(state.data)
+          return state.data
+        },
+        loadstatistik: (state) => {
+          return state.statistik
         },
   }
   
@@ -146,6 +149,11 @@ const state = {
           if( localStorage.getItem('vuex.Status' )) {
             let status = JSON.parse(localStorage.getItem('vuex.Status'));
             state.status = status
+          }
+          if ( localStorage.getItem('vuex.statistik') )
+          {
+            let statistikdata = JSON.parse(localStorage.getItem('vuex.statistik'));
+            state.statistik = statistikdata
           }
       },
   

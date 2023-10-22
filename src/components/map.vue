@@ -1,16 +1,15 @@
 <template>
-    <div class="h-screen flex flex-col">
+    <div id="mapbase" class="h-screen flex flex-col">
     <ol-map :loadTilesWhileAnimating="true" :loadTilesWhileInteracting="true" style="height: 100vh" ref="mapRef" renderer="webgl">
 
     <ol-fullscreen-control />
     <ol-scaleline-control />
     <ol-rotate-control />
     <ol-zoom-control />
-    <ol-zoomslider-control />
-
+    
     <ol-view ref="view" :center="center" :rotation="rotation" :zoom="zoom" :projection="projection"/>
   
-    <ol-tile-layer title="Base">
+    <ol-tile-layer title="Base" id="mapbase">
       <ol-source-osm />
     </ol-tile-layer>
 
@@ -21,7 +20,7 @@
         />
     </ol-webgl-points-layer>
 
-    <ol-vector-layer title="Jabar">
+    <ol-vector-layer title="Jabar" id="mapshape">
         <ol-source-vector ref="kabupaten" url="https://raw.githubusercontent.com/timfajr/axczweqe/main/src/assets/jabar_shape.json" :format="geoJson" :projection="projection" />
         <ol-style :overrideStyleFunction="overrideStyleFunctionShape" :zIndex="1"> 
           <ol-style-stroke color="white" :width="1"></ol-style-stroke>
@@ -90,8 +89,8 @@
 // Cluster Logic 
  import { Point } from "ol/geom"
  import Feature from "ol/Feature"
- 
-const overrideStyleFunctionPoint = (feature, style) => {
+ let selectedpoint = {}
+ const overrideStyleFunctionPoint = (feature, style) => {
   const clusteredFeatures = feature.get("features");
   const size = clusteredFeatures.length;
 
@@ -117,9 +116,10 @@ const overrideStyleFunctionPoint = (feature, style) => {
 };
 
 const featureSelected = (event) => {
+  console.log(event.selected[0])
   if ( event.selected[0] && event.selected[0].values_.features[0].values_.data.name ){
   selectedpoint = {"name" : event.selected[0].values_.features[0].values_.data.name , "canvaser" : event.selected[0].values_.features[0].values_.data.canvaser, "catatan" :  event.selected[0].values_.features[0].values_.data.catatan, "memilih" : event.selected[0].values_.features[0].values_.data.memilih, "tokoh" : event.selected[0].values_.features[0].values_.data.tokoh , "mesjid": event.selected[0].values_.features[0].values_.data.mesjid};
-  store.dispatch('cart/addPoint', jsonfile.features )
+  store.dispatch('cart/addPoint', selectedpoint )
   store.commit('cart/initialiseStore')
   }
   else {
@@ -188,10 +188,6 @@ onMounted(() => {
   
   const format = inject('ol-format');
   const geoJson = new format.GeoJSON();
-
-  const pointurl = computed(() => {
-  return `http://localhost:3000/${count.value}`;
-  });
   
   const webglPointsStyle = {
     "zIndex" : 15,
@@ -283,7 +279,6 @@ async function increment() {
       "t_pro" : t_pro,
       "Radikal" : Radikal
     })
-    store.dispatch('cart/addPersonal' , jsonfile.features)
     store.commit('cart/initialiseStore')
     }
   onMounted(() => {
@@ -293,7 +288,7 @@ async function increment() {
     if ( map ) {
       map.on('postcompose', function (e) {
         // console.log(document.getElementsByTagName('canvas'))
-        document.querySelector('canvas').style.filter =
+        document.querySelector('#mapbase canvas').style.filter =
           'brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.5) brightness(0.7)';
       });
     }

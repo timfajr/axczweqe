@@ -54,14 +54,26 @@
     </div>
 </div>
     <!-- Wrapper Statistik  -->
-    <apexchart
-      width="300"
-      type="donut"
-      :options="chartOptions"
-      :series="series"
-    ></apexchart>
+    <div class="flex justify-center pt-10">
+      <p>
+       Data Suara Personal
+      </p>
     </div>
- 
+    <!-- CHART  -->
+    <div class="mt-5">
+      <apexchart ref="donut" width="350" type="donut" :options="chartOptions" :series="series" />
+    </div>
+    <!-- CHART  -->
+    <div class="flex justify-center pt-10">
+      <p>
+       Data Hoax
+      </p>
+    </div>
+
+    <apexchart ref="donut" width="350" type="donut" :options="chartOptions" :series="series" />
+    </div>
+ <!-- Right Side Start  -->
+
     <Maps class="h-screen w-screen justify-items-center " />
     <div class="h-screen w-3/12 justify-items-end bg-mainblack">
         <div class="flex justify-center pt-10">
@@ -76,39 +88,68 @@
 </template>
 <script>
 import Maps from "/src/components/map.vue"
+
 export default {
     name: 'App',
-    data() {
+    data: function() {
       return {
         Wilayah:"",
         Jokowi:"",
         Prabowo:"",
         Imbang:"",
+        statistik_total : { "Jokowi" : 0 , "Prabowo" : 0 , "Ragu" : 0 },
+        status : "loading",
         chartOptions: {
-        labels: ['Jokowi', 'Prabowo', 'Ragu'],
-        legend: {
-          show: false
-        },
-        stroke: {
-          width: 0,
-        },
-        plotOptions: {
-          pie: {
-            startAngle: -90,
-            endAngle: 90,
-            offsetY: 10,
+          plotOptions: {
+            pie: {
+              expandOnClick: false
+            }
           },
-        }
+          colors: ['#FF595E', '#1982C4', '#A5B557'],
+          labels: ["Jokowi", "Prabowo", "Ragu"],
+          tooltip: {
+            enabled: true,
+            onDatasetHover: {
+          highlightDataSeries: true,
+      },
+          },
+          stroke: {
+              show: true,
+              curve: 'smooth',
+              lineCap: 'butt',
+              colors: "#202020",
+              width: 6,
+              dashArray: 0, 
+          },
+          legend: {
+          position: 'bottom',
+          labels: {
+          colors: "white",
+          useSeriesColors: true
+          },
+          },
         },
-        series: [44, 55, 13, 33],
-      }
+        series: [0,0,0],
+        }
     },
     components : {
     Maps
     },
+
     // Update Crud
     mounted(){
+      this.updateChart()
     },
+    methods:{
+     updateChart() {
+        this.series = [ this.$store.state.cart.statistik["Jokowi"] ,this.$store.state.cart.statistik["Prabowo"] ,this.$store.state.cart.statistik["Ragu"] ]  
+      }
+    },
+    computed: {
+    statistik_cache () {
+      return this.$store.getters['cart/loadstatistik']
+    }
+  }
 }
 </script>
 <style>
